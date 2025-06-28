@@ -1,16 +1,21 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from app_backend_rna.models.audio import Audio
+from rest_framework.permissions import IsAuthenticated
+
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def create_audio(request):
+    user = request.user
+
     audio_file = request.FILES.get('file')
     audio_title = request.data.get('audio_title')
 
     if not audio_file or not audio_title:
         return Response({'error': 'Aucun fichier audio fourni'}, status=400)
     
-    audio = Audio.objects.create(file=audio_file, audio_title=audio_title)
+    audio = Audio.objects.create(user=user, file=audio_file, audio_title=audio_title)
 
     return Response({
         "audio_id": audio.audio_id,
@@ -20,6 +25,7 @@ def create_audio(request):
     })
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def list_audio(request):
     audios = Audio.objects.all()
     audio_list = [
@@ -34,9 +40,11 @@ def list_audio(request):
     return Response(audio_list)
 
 @api_view(['GET'])
-def get_audio(request, audio_id):
+@permission_classes([IsAuthenticated])
+def get_audio_by_user(request):
+    user = request.user
     try:
-        audio = Audio.objects.get(audio_id=audio_id)
+        audio = Audio.objects.get(user=user)
     except Audio.DoesNotExist:
         return Response({'error': 'Audio non trouvé'}, status=404)
     
@@ -48,6 +56,7 @@ def get_audio(request, audio_id):
     })
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def delete_audio(request, audio_id):
     try:
         audio = Audio.objects.get(audio_id=audio_id)

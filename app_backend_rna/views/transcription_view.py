@@ -1,12 +1,14 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from app_backend_rna.models.audio import Audio
 from app_backend_rna.models.transcription import Transcription
 import whisper
 import os
+from rest_framework.permissions import IsAuthenticated
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def create_transcription(request):
     audio_id = request.data.get('audio_id')
     transcription_title = request.data.get('transcription_title')
@@ -38,6 +40,7 @@ def create_transcription(request):
     }, status=201)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def list_transcription(request):
     transcriptions = Transcription.objects.all()
     transcription_list = [
@@ -52,6 +55,7 @@ def list_transcription(request):
     return Response (transcription_list)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_transcription(request, transcription_id):
     try:
         transcription = Transcription.objects.get(transcription_id=transcription_id)
@@ -66,6 +70,7 @@ def get_transcription(request, transcription_id):
     })
 
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated])
 def update_transcription(request, transcription_id):
     try:
         transcription = Transcription.objects.get(transcription_id=transcription_id)
@@ -94,6 +99,7 @@ def update_transcription(request, transcription_id):
     })
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def delete_transcription(request, transcription_id):
     try:
         transcription = Transcription.objects.get(transcription_id=transcription_id)
