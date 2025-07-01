@@ -1,9 +1,11 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from app_backend_rna.models.user import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAuthenticated
+
 
 @api_view(['POST'])
 def register(request):
@@ -38,3 +40,14 @@ def login(request):
         })
     else: 
         return Response({'error': "Nom d'utilisateur ou mot de passe invalide"}, status=401)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_by_id(request):
+    user = request.user  # ✅ L'utilisateur déjà connecté via le JWT
+
+    return Response({
+        "id": user.id,
+        "user_name": user.user_name,
+        "user_mail": user.user_mail
+    })
